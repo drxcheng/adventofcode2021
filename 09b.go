@@ -57,37 +57,12 @@ func main() {
     // fmt.Println(basinIndexMap)
 
     lowestBasinIndex := 0
-    x := 0
-    y := 0
-    for {
-        // fmt.Println("search x=", x, ", y=", y)
-
-        recursivelySetBasinIndex(basinIndexMap, lowestBasinIndex, x, y)
-        // fmt.Println(basinIndexMap)
-
-        // find next
-        xNew := x
-        yNew := y
-        for ; yNew < len(basinIndexMap); yNew++ {
-            foundY := false
-            for ; xNew < len(basinIndexMap[yNew]); xNew++ {
-                if basinIndexMap[yNew][xNew] == -1 {
-                    foundY = true
-                    x = xNew
-                    y = yNew
-                    lowestBasinIndex += 1
-                    break
-                }
+    for y := 0; y < len(basinIndexMap); y++ {
+        for x := 0; x < len(basinIndexMap[y]); x++ {
+            if basinIndexMap[y][x] == -1 {
+                recursivelySetBasinIndex(basinIndexMap, lowestBasinIndex, x, y)
+                lowestBasinIndex += 1
             }
-            if foundY {
-                break
-            }
-            xNew = 0
-        }
-
-        if yNew == len(basinIndexMap) && xNew == 0 {
-            // all done
-            break
         }
     }
 
