@@ -6,5 +6,5 @@ import (
 
 // run GO111MODULE=off go run 14a.go
 func main() {
-    dec14.Helper(10)
+    dec14.Helper(40)
 }
