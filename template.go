@@ -17,6 +17,7 @@ func main() {
     aMap := make(map[int]map[int]string)
 
     scanner := bufio.NewScanner(file)
+    lineNumber := 0
     for scanner.Scan() {
         aMatrix = append(aMatrix, []string{})
 
@@ -27,14 +28,17 @@ func main() {
 
             aSlice = append(aSlice, char)
 
-            aMatrix[0] = append(energyMatrix[0], char)
+            aMatrix[lineNumber] = append(aMatrix[lineNumber], char)
 
             _, ok := aMap[number]
             if !ok {
                 aMap[number] = make(map[int]string)
             }
             aMap[number][0] = char
+
         }
+
+        lineNumber += 1
     }
 
     fmt.Println("slice:", aSlice)
