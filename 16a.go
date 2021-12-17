@@ -27,7 +27,9 @@ var hexMapping = map[string]string{
     "F": "1111",
 }
 
-func readPacket(bitString []rune, versionNumberSum *int) []rune {
+var versionNumberSum = 0
+
+func readPacket(bitString []rune) []rune {
     if (len(bitString) <= 6) {
         // fmt.Println("End of all packets")
         return []rune{}
@@ -37,7 +39,7 @@ func readPacket(bitString []rune, versionNumberSum *int) []rune {
     version, _ := strconv.ParseInt(string(bitString[0:3]), 2, 64)
     bitString = bitString[3:]
     // fmt.Println("packet version:", version)
-    *versionNumberSum += int(version)
+    versionNumberSum += int(version)
     // 3 bits T
     typeId, _ := strconv.ParseInt(string(bitString[0:3]), 2, 64)
     bitString = bitString[3:]
@@ -55,7 +57,7 @@ func readPacket(bitString []rune, versionNumberSum *int) []rune {
                     }
                 }
                 if !allZero {
-                    bitString = readPacket(bitString[5:], versionNumberSum)
+                    bitString = readPacket(bitString[5:])
                 } else {
                     return []rune{}
                 }
@@ -75,11 +77,11 @@ func readPacket(bitString []rune, versionNumberSum *int) []rune {
             // fmt.Println("length:", length)
             bitString = bitString[15:]
 
-            readPacket(bitString[:length], versionNumberSum)
+            readPacket(bitString[:length])
             bitString = bitString[length:]
 
             if len(bitString) > 0 {
-                bitString = readPacket(bitString, versionNumberSum)
+                bitString = readPacket(bitString)
             }
         } else {
             // next 11
@@ -87,7 +89,7 @@ func readPacket(bitString []rune, versionNumberSum *int) []rune {
             // fmt.Println("count:", count)
             bitString = bitString[11:]
             for i := 0; i < int(count); i++ {
-                bitString = readPacket(bitString, versionNumberSum)
+                bitString = readPacket(bitString)
             }
         }
 
@@ -117,8 +119,7 @@ func main() {
     }
     // fmt.Println(string(bitString))
 
-    versionNumberSum := 0
-    bitString = readPacket(bitString, &versionNumberSum)
+    readPacket(bitString)
 
     fmt.Println("versionNumberSum:", versionNumberSum)
 }
