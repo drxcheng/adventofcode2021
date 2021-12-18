@@ -59,18 +59,30 @@ func getValue(values []int, operation int64) int {
         }
         return max
     } else if operation == 5 {
+        if len(values) != 2 {
+            fmt.Println(values)
+            panic("wrong >")
+        }
         if values[0] > values[1] {
             return 1
         } else {
             return 0
         }
     } else if operation == 6 {
+        if len(values) != 2 {
+            fmt.Println(values)
+            panic("wrong <")
+        }
         if values[0] < values[1] {
             return 1
         } else {
             return 0
         }
     } else if operation == 7 {
+        if len(values) != 2 {
+            fmt.Println(values)
+            panic("wrong ==")
+        }
         if values[0] == values[1] {
             return 1
         } else {
@@ -89,6 +101,7 @@ func readPacket(bitString *[]rune, onlyOne bool) []int {
     }
 
     fmt.Println("Read packet:", string(*bitString))
+    fmt.Println("Total length:", len(*bitString))
     version, _ := strconv.ParseInt(string((*bitString)[0:3]), 2, 64)
     *bitString = (*bitString)[3:]
     fmt.Println("packet version:", version)
@@ -101,15 +114,22 @@ func readPacket(bitString *[]rune, onlyOne bool) []int {
     values := []int{}
     if typeId == 4 {
         // literal
+        literalNumberStr := []rune{}
         for len(*bitString) >= 5 {
-            literalNumber, _ := strconv.ParseInt(string((*bitString)[1:5]), 2, 64)
-            values = append(values, int(literalNumber))
             if (*bitString)[0] == '0' {
                 // end of a packet
+                for i := 1; i < 5; i++ {
+                    literalNumberStr = append(literalNumberStr, (*bitString)[i])
+                }
                 *bitString = (*bitString)[5:]
-                fmt.Println("End of literal. Values:", values)
+                literalNumber, _ := strconv.ParseInt(string(literalNumberStr), 2, 64)
+                fmt.Println("End of literal:", literalNumber)
+                values = append(values, int(literalNumber))
                 break
             } else {
+                for i := 1; i < 5; i++ {
+                    literalNumberStr = append(literalNumberStr, (*bitString)[i])
+                }
                 *bitString = (*bitString)[5:]
             }
         }
@@ -181,8 +201,8 @@ func main() {
     // hexString := "CE00C43D881120" // [max 7 8 9]
     // hexString := "D8005AC2A8F0" //  [< 5 15]
     // hexString := "F600BC2D8F" // [> 5 15]
-    // hexString := "9C005AC2F8F0" // [= 5 15]
-    // hexString := "9C0141080250320F1802104A08" // [= (+ 1 3) (* 2 2)]
+    // hexString = "9C005AC2F8F0" // [= 5 15]
+    // hexString = "9C0141080250320F1802104A08" // [= (+ 1 3) (* 2 2)]
 
     bitString := []rune{}
     for _, v := range strings.Split(hexString, "") {
