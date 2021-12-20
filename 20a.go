@@ -8,6 +8,32 @@ import (
     "fmt"
 )
 
+func expandImage(imageMap map[int]map[int]rune) map[int]map[int]rune {
+    expandedImageMap := make(map[int]map[int]rune)
+
+    for i := 0; i < len(imageMap); i++ {
+        _, ok := expandedImageMap[i + 1]
+        if !ok {
+            expandedImageMap[i + 1] = make(map[int]rune)
+        }
+
+        expandedImageMap[i + 1][0] = '0'
+        for j := 0; j < len(imageMap[i]); j++ {
+            expandedImageMap[i + 1][j + 1] = imageMap[i][j]
+        }
+        expandedImageMap[i + 1][len(imageMap[i]) + 1] = '0'
+    }
+
+    expandedImageMap[0] = make(map[int]rune)
+    expandedImageMap[len(imageMap) + 1] = make(map[int]rune)
+    for i := 0; i < len(imageMap[0]) + 2; i++ {
+        expandedImageMap[0][i] = '0'
+        expandedImageMap[len(expandedImageMap) - 1][i] = '0'
+    }
+
+    return expandedImageMap
+}
+
 func enhanceImage(algorithm []string, imageInputMap map[int]map[int]rune) map[int]map[int]rune {
     enhancedImageMap := make(map[int]map[int]rune)
 
@@ -147,48 +173,48 @@ func main() {
     imageInputMap := make(map[int]map[int]rune)
 
     lineNumber := 0
-    imageInputMap[lineNumber] = make(map[int]rune)
-    lineNumber += 1
-    imageInputMap[lineNumber] = make(map[int]rune)
-    lineNumber += 1
     for scanner.Scan() {
         _, ok := imageInputMap[lineNumber]
         if !ok {
             imageInputMap[lineNumber] = make(map[int]rune)
         }
 
-        imageInputMap[lineNumber][0] = '0'
-        imageInputMap[lineNumber][1] = '0'
         for i, char := range strings.Split(scanner.Text(), "") {
             if char == "#" {
-                imageInputMap[lineNumber][i + 2] = '1'
+                imageInputMap[lineNumber][i] = '1'
             } else {
-                imageInputMap[lineNumber][i + 2] = '0'
+                imageInputMap[lineNumber][i] = '0'
             }
         }
-        imageInputMap[lineNumber][len(imageInputMap[lineNumber])] = '0'
-        imageInputMap[lineNumber][len(imageInputMap[lineNumber])] = '0'
 
         lineNumber += 1
     }
-    imageInputMap[lineNumber] = make(map[int]rune)
-    imageInputMap[lineNumber + 1] = make(map[int]rune)
-    for i := 0; i < len(imageInputMap[2]); i++ {
-        imageInputMap[0][i] = '0'
-        imageInputMap[1][i] = '0'
-        imageInputMap[lineNumber][i] = '0'
-        imageInputMap[lineNumber + 1][i] = '0'
+    // fmt.Println("input: ")
+    // printImage(imageInputMap)
+
+    var totalLights int
+    var prevTotalLights int
+    for {
+        enhancedImageMap := enhanceImage(algorithm, imageInputMap)
+        // fmt.Println("enhanced: ")
+        // printImage(enhancedImageMap)
+
+        enhancedImageMap = enhanceImage(algorithm, enhancedImageMap)
+        // fmt.Println("further enhanced: ")
+        // printImage(enhancedImageMap)
+
+        totalLights = countLight(enhancedImageMap)
+        fmt.Println("Total lights: ", totalLights, ", Previous total lights: ", prevTotalLights)
+
+        if totalLights != prevTotalLights {
+            prevTotalLights = totalLights
+            imageInputMap = expandImage(imageInputMap)
+            // fmt.Println("expanded input: ")
+            // printImage(imageInputMap)
+        } else {
+            break
+        }
     }
-    fmt.Println("input: ")
-    printImage(imageInputMap)
 
-    enhancedImageMap := enhanceImage(algorithm, imageInputMap)
-    fmt.Println("enhanced: ")
-    printImage(enhancedImageMap)
-
-    furtherEnhancedImageMap := enhanceImage(algorithm, enhancedImageMap)
-    fmt.Println("further enhanced: ")
-    printImage(furtherEnhancedImageMap)
-
-    fmt.Println("Total lights: ", countLight(furtherEnhancedImageMap))
+    fmt.Println("Total lights: ", totalLights)
 }
